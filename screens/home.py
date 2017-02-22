@@ -38,7 +38,7 @@ class HomeScreen(Screen):
                     return
 
                 localapi.doses.update_doses_from_remote()
-                time.sleep(5)
+                time.sleep(2.5)
 
         thread.start_new_thread(check_current_dose_worker, ())
         thread.start_new_thread(fetch_doses_from_remote_worker, ())
@@ -47,8 +47,7 @@ class HomeScreen(Screen):
         """Checks whether there is a dose that can be pended"""
 
         # If there is no pending dose, check for a new pending dose
-        if self.pending_dose is None:
-            self.pending_dose = localapi.doses.get_current_dose(datetime.time(8))
+        self.pending_dose = localapi.doses.get_current_dose(datetime.time(8))
 
         # Update the message if necessary
         if self.pending_dose is None:
@@ -60,6 +59,9 @@ class HomeScreen(Screen):
                                            % (self.pending_dose.title, self.pending_dose.description)
 
     def dispense_clicked(self):
-        localapi.doses.notify_dose_dispensed(self.pending_dose, datetime.time(9, 33, 21))
-        self.pending_dose = None
         self.check_pending_dose()
+
+        if self.pending_dose is not None:
+            localapi.doses.notify_dose_dispensed(self.pending_dose, datetime.time(9, 33, 21))
+            self.pending_dose = None
+            self.check_pending_dose()

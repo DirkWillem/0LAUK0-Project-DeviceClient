@@ -132,8 +132,6 @@ def parse_time(tstr):
 
 def update_doses_from_remote():
     """Updates the doses from the remote server"""
-    Logger.info("Updating doses table from remote")
-
     insert_dose_query = """
 INSERT INTO Doses (ID, Title, Description, DispenseBefore, DispenseAfter)
 VALUES (%(id)s, %(title)s, %(description)s, %(dispense_before)s, %(dispense_after)s)

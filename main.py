@@ -16,9 +16,9 @@ sm = ScreenManager()
 sm.add_widget(HomeScreen())
 
 
-class MainApp(App):
+class Application(App):
     def build(self):
         return sm
 
 if __name__ == '__main__':
-    MainApp().run()
+    Application().run()
