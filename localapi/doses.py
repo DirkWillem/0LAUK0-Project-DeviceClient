@@ -70,17 +70,17 @@ WHERE DM.DoseID = %(dose_id)s
     return None
 
 
-def get_current_dose(time):
+def get_current_dose():
     """Returns all doses that should be dispensed at the given time"""
 
     query = """
-SELECT D.ID, Title, Description
+SELECT D.ID, D.Title, D.Description
 FROM Doses D
 LEFT JOIN (SELECT MAX(DispensedTime) AS MaxDispensedTime, DoseID FROM DoseHistory GROUP BY DoseID) DH ON DH.DoseID = D.ID
 WHERE
-  ((DispenseAfter < DispenseBefore AND CAST(%(time)s AS TIME) BETWEEN DispenseAfter AND DispenseBefore) OR
-    (DispenseAfter > DispenseBefore AND (CAST(%(time)s AS TIME) > DispenseAfter OR CAST(%(time)s AS TIME) < DispenseBefore)))
-  AND (ISNULL(DH.MaxDispensedTime) OR DH.MaxDispensedTime < TIMESTAMP(CURRENT_DATE(), %(time)s))
+  ((DispenseAfter < DispenseBefore AND CURRENT_TIME() BETWEEN DispenseAfter AND DispenseBefore) OR
+    (DispenseAfter > DispenseBefore AND CURRENT_TIME() > DispenseAfter OR CURRENT_TIME() < DispenseBefore))
+  AND (ISNULL(DH.MaxDispensedTime) OR DH.MaxDispensedTime < TIMESTAMP(CURRENT_DATE(), DispenseAfter))
 ORDER BY DispenseAfter
 LIMIT 1
 """
@@ -91,7 +91,7 @@ LIMIT 1
 
     # Execute query
     result = None
-    cursor.execute(query, {'time': time})
+    cursor.execute(query)
     for (dose_id, title, description) in cursor:
         result = models.dose.DoseMinimal(dose_id, title, description)
 
@@ -101,13 +101,13 @@ LIMIT 1
     return result
 
 
-def notify_dose_dispensed(dose, dispensed_time):
+def notify_dose_dispensed(dose):
     """Notifies the system that a dose has been dispensed and inserts it into the dose history table"""
 
     Logger.info("Dose %d has been dispensed. Inserting DoseHistory record" % dose.dose_id)
 
     query = """
-INSERT INTO DoseHistory (DoseID, DispensedTime) VALUES (%(dose_id)s, CAST(%(dispensed_time)s AS TIME))
+INSERT INTO DoseHistory (DoseID, DispensedTime) VALUES (%(dose_id)s, TIMESTAMP(CURRENT_DATE(), CURRENT_TIME()))
 """
 
     # Connect to MySQL
@@ -115,7 +115,7 @@ INSERT INTO DoseHistory (DoseID, DispensedTime) VALUES (%(dose_id)s, CAST(%(disp
     cursor = cnx.cursor()
 
     # Execute query
-    cursor.execute(query, {'dose_id': dose.dose_id, 'dispensed_time': dispensed_time})
+    cursor.execute(query, {'dose_id': dose.dose_id})
     cnx.commit()
 
     # Close connection

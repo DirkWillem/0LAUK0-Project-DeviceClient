@@ -47,7 +47,7 @@ class HomeScreen(Screen):
         """Checks whether there is a dose that can be pended"""
 
         # If there is no pending dose, check for a new pending dose
-        self.pending_dose = localapi.doses.get_current_dose(datetime.time(8))
+        self.pending_dose = localapi.doses.get_current_dose()
 
         # Update the message if necessary
         if self.pending_dose is None:
@@ -62,6 +62,6 @@ class HomeScreen(Screen):
         self.check_pending_dose()
 
         if self.pending_dose is not None:
-            localapi.doses.notify_dose_dispensed(self.pending_dose, datetime.time(9, 33, 21))
+            localapi.doses.notify_dose_dispensed(self.pending_dose)
             self.pending_dose = None
             self.check_pending_dose()
