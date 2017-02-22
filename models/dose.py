@@ -2,7 +2,7 @@ class DoseMinimal(object):
     """Contains minimal data on a dose"""
 
     def __init__(self, dose_id, title, description):
-        self.id = dose_id
+        self.dose_id = dose_id
         self.title = title
         self.description = description
 

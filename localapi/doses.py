@@ -1,5 +1,3 @@
-import json
-
 from localapi import get_mysql_cnx
 import api.doses
 import localapi.medications
@@ -11,7 +9,7 @@ def get_doses():
     """Returns all doses that are saved locally"""
 
     query = """
-    SELECT ID, Title, Description FROM Doses
+SELECT ID, Title, Description FROM Doses
     """
 
     # Connect to MySQL
@@ -102,15 +100,15 @@ def notify_dose_dispensed(dose, dispensed_time):
     """Notifies the system that a dose has been dispensed and inserts it into the dose history table"""
 
     query = """
-    INSERT INTO DoseHistory (DoseID, DispensedTime) VALUES (%(dose_id)s, CAST(%(dispensed_time)s AS TIME))
-        """
+INSERT INTO DoseHistory (DoseID, DispensedTime) VALUES (%(dose_id)s, CAST(%(dispensed_time)s AS TIME))
+"""
 
     # Connect to MySQL
     cnx = get_mysql_cnx()
     cursor = cnx.cursor()
 
     # Execute query
-    cursor.execute(query, {'dose_id': dose.id, 'dispensed_time': dispensed_time})
+    cursor.execute(query, {'dose_id': dose.dose_id, 'dispensed_time': dispensed_time})
     cnx.commit()
 
     # Close connection
@@ -147,11 +145,11 @@ WHERE ID = %(id)s
     """
 
     insert_dose_medication_query = """
-    INSERT INTO DoseMedications (Amount, MedicationID, DoseID)
-    VALUES (%(amount)s, %(medication_id)s, %(dose_id)s)
+INSERT INTO DoseMedications (Amount, MedicationID, DoseID)
+VALUES (%(amount)s, %(medication_id)s, %(dose_id)s)
     """
     delete_dose_medication_query = """
-    DELETE FROM DoseMedications WHERE ID = %(id)s
+DELETE FROM DoseMedications WHERE ID = %(id)s
     """
 
     insert_medication_query = """
