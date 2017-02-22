@@ -1,4 +1,9 @@
+from kivy.logger import Logger
+
 from localapi import get_mysql_cnx
+
+import datetime
+import time
 import api.doses
 import localapi.medications
 import models.dose
@@ -99,6 +104,8 @@ LIMIT 1
 def notify_dose_dispensed(dose, dispensed_time):
     """Notifies the system that a dose has been dispensed and inserts it into the dose history table"""
 
+    Logger.info("Dose %d has been dispensed. Inserting DoseHistory record" % dose.dose_id)
+
     query = """
 INSERT INTO DoseHistory (DoseID, DispensedTime) VALUES (%(dose_id)s, CAST(%(dispensed_time)s AS TIME))
 """
@@ -116,8 +123,17 @@ INSERT INTO DoseHistory (DoseID, DispensedTime) VALUES (%(dose_id)s, CAST(%(disp
     cnx.close()
 
 
+def parse_time(tstr):
+    dt = datetime.datetime.strptime(tstr, "%H:%M:%S")
+    tt = dt.timetuple()
+
+    return datetime.time(tt.tm_hour, tt.tm_min, tt.tm_sec)
+
+
 def update_doses_from_remote():
     """Updates the doses from the remote server"""
+    Logger.info("Updating doses table from remote")
+
     insert_dose_query = """
 INSERT INTO Doses (ID, Title, Description, DispenseBefore, DispenseAfter)
 VALUES (%(id)s, %(title)s, %(description)s, %(dispense_before)s, %(dispense_after)s)
@@ -175,6 +191,8 @@ VALUES (%(id)s, %(title)s, %(description)s)
         # Check if any medications need to be inserted
         for dose_medication in dose_remote.medications:
             if not any([m for m in medications if m.medication_id == dose_medication.medication.medication_id]):
+                Logger.info("Inserting new Medication record with ID %d" % dose_medication.medication.medication_id)
+
                 cursor.execute(insert_medication_query, {
                     "id": dose_medication.medication.medication_id,
                     "title": dose_medication.medication.title,
@@ -185,6 +203,8 @@ VALUES (%(id)s, %(title)s, %(description)s)
 
         # If the dose doesn't exist locally, create it
         if dose_local is None:
+            Logger.info("Inserting new Dose record with ID %d" % dose_remote.dose_id)
+
             cursor.execute(insert_dose_query, {
                 "id": dose_remote.dose_id,
                 "title": dose_remote.title,
@@ -201,10 +221,13 @@ VALUES (%(id)s, %(title)s, %(description)s)
                 })
         # Otherwise, check for any differences
         else:
-            if dose_remote.title != dose_local.title \
-                    or dose_remote.description != dose_local.description \
-                    or dose_remote.dispense_after != dose_local.dispense_after \
-                    or dose_remote.dispense_before != dose_local.dispense_before:
+            if str(dose_remote.title) != str(dose_local.title) \
+                    or str(dose_remote.description) != str(dose_local.description) \
+                    or parse_time(dose_remote.dispense_after) != parse_time(str(dose_local.dispense_after)) \
+                    or parse_time(dose_remote.dispense_before) != parse_time(str(dose_local.dispense_before)):
+
+
+                Logger.info("Updating dose record with ID %d", dose_remote.dose_id)
                 cursor.execute(update_dose_query, {
                     "title": dose_remote.title,
                     "description": dose_remote.description,
@@ -246,8 +269,9 @@ VALUES (%(id)s, %(title)s, %(description)s)
 
     for dose in doses_local:
         if not any([d for d in doses if d.dose_id == dose.dose_id]):
+            Logger.info("Deleting Dose record with ID %d" % dose.dose_id)
             cursor.execute(delete_dose_query, {
-                "id": d.dose_id
+                "id": dose.dose_id
             })
 
     # Commit and close

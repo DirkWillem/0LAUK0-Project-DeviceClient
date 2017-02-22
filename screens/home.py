@@ -15,14 +15,14 @@ class HomeScreen(Screen):
         super(Screen, self).__init__()
         self.name = "Home"
         self.stop = False
-        self.start_dose_thread()
+        self.start_dose_workers()
         self.pending_dose = None
-        localapi.doses.update_doses_from_remote()
 
-    def start_dose_thread(self):
+    def start_dose_workers(self):
         """Starts the background process that checks for new doses"""
 
-        def check():
+        def check_current_dose_worker():
+            """Checks if there is a new dose to dispense"""
             while True:
                 # Check if the thread needs to be stopped
                 if self.stop:
@@ -32,7 +32,16 @@ class HomeScreen(Screen):
                 self.check_pending_dose()
                 time.sleep(0.2)
 
-        thread.start_new_thread(check, ())
+        def fetch_doses_from_remote_worker():
+            while True:
+                if self.stop:
+                    return
+
+                localapi.doses.update_doses_from_remote()
+                time.sleep(5)
+
+        thread.start_new_thread(check_current_dose_worker, ())
+        thread.start_new_thread(fetch_doses_from_remote_worker, ())
 
     def check_pending_dose(self):
         """Checks whether there is a dose that can be pended"""
