@@ -79,7 +79,7 @@ FROM Doses D
 LEFT JOIN (SELECT MAX(DispensedTime) AS MaxDispensedTime, DoseID FROM DoseHistory GROUP BY DoseID) DH ON DH.DoseID = D.ID
 WHERE
   ((DispenseAfter < DispenseBefore AND CURRENT_TIME() BETWEEN DispenseAfter AND DispenseBefore) OR
-    (DispenseAfter > DispenseBefore AND CURRENT_TIME() > DispenseAfter OR CURRENT_TIME() < DispenseBefore))
+    (DispenseAfter > DispenseBefore AND (CURRENT_TIME() > DispenseAfter OR CURRENT_TIME() < DispenseBefore)))
   AND (ISNULL(DH.MaxDispensedTime) OR DH.MaxDispensedTime < TIMESTAMP(CURRENT_DATE(), DispenseAfter))
 ORDER BY DispenseAfter
 LIMIT 1
@@ -171,7 +171,6 @@ INSERT INTO Medications (ID, Title, Description)
 VALUES (%(id)s, %(title)s, %(description)s)
 """
 
-
     # Connect to MySQL
     cnx = get_mysql_cnx()
     cursor = cnx.cursor()
@@ -223,8 +222,6 @@ VALUES (%(id)s, %(title)s, %(description)s)
                     or str(dose_remote.description) != str(dose_local.description) \
                     or parse_time(dose_remote.dispense_after) != parse_time(str(dose_local.dispense_after)) \
                     or parse_time(dose_remote.dispense_before) != parse_time(str(dose_local.dispense_before)):
-
-
                 Logger.info("Updating dose record with ID %d", dose_remote.dose_id)
                 cursor.execute(update_dose_query, {
                     "title": dose_remote.title,
@@ -237,7 +234,7 @@ VALUES (%(id)s, %(title)s, %(description)s)
             # Check if any dose medications need to be added or updated
             for dose_medication in dose_remote.medications:
                 local_medications = [dm for dm in dose_local.medications
-                         if dm.medication.medication_id == dose_medication.medication.medication_id]
+                                     if dm.medication.medication_id == dose_medication.medication.medication_id]
 
                 if any(local_medications):
                     dm = local_medications[0]
@@ -259,7 +256,7 @@ VALUES (%(id)s, %(title)s, %(description)s)
                                       if dm.medication.medication_id == dose_medication.medication.medication_id]
                 if not any(remote_medications):
                     cursor.execute(delete_dose_medication_query, {
-                        "id": dose_medication.id
+                        "id": dose_medication.dosemedication_id
                     })
 
     # Check if any doses need to be removed
