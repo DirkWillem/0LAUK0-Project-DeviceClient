@@ -1,3 +1,11 @@
+class DoseHistorySummary(object):
+    """Contains a dose history entry"""
+
+    def __init__(self, dose_history_id, dispensed_day, dispensed_time):
+        self.dose_history_id = dose_history_id
+        self.dispensed_day = dispensed_day
+        self.dispensed_time = dispensed_time
+
 class DoseMinimal(object):
     """Contains minimal data on a dose"""
 

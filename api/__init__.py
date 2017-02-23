@@ -17,6 +17,12 @@ class RestClient(object):
         req.add_header('X-JWT', self.token)
         return json.load(urllib2.urlopen(req))
 
+    def post_json(self, endpoint_url, data):
+        """Executes a POST requrest to a JSON API endpoint"""
+        req = urllib2.Request(api_url + endpoint_url)
+        req.add_header('X-JWT', self.token)
+        return json.load(urllib2.urlopen(req, json.dumps(data)))
+
 # Retrieve authentication token
 cfg = AppConfig()
 

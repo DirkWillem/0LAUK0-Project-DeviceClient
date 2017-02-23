@@ -106,21 +106,45 @@ def notify_dose_dispensed(dose):
 
     Logger.info("Dose %d has been dispensed. Inserting DoseHistory record" % dose.dose_id)
 
-    query = """
+    insert_query = """
 INSERT INTO DoseHistory (DoseID, DispensedTime) VALUES (%(dose_id)s, TIMESTAMP(CURRENT_DATE(), CURRENT_TIME()))
 """
+
+    select_query = """
+SELECT CURRENT_DATE(), DispensedTime FROM DoseHistory WHERE ID = %(dose_history_id)s
+    """
 
     # Connect to MySQL
     cnx = get_mysql_cnx()
     cursor = cnx.cursor()
 
     # Execute query
-    cursor.execute(query, {'dose_id': dose.dose_id})
+    cursor.execute(insert_query, {'dose_id': dose.dose_id})
+
+    insert_id = cursor.lastrowid
+
+    result = None
+    cursor.execute(select_query, {'dose_history_id': insert_id})
+
+    for (dispensed_day, dispensed_time) in cursor:
+        result = models.dose.DoseHistorySummary(insert_id, format_date(dispensed_day), format_time(dispensed_time))
+
     cnx.commit()
 
     # Close connection
     cursor.close()
     cnx.close()
+
+    # Notify service that this record has been inserted
+    api.doses.create_dose_history_entry(dose.dose_id, result)
+
+
+def format_date(date):
+    return datetime.datetime.strftime(date, "%Y-%m-%d")
+
+
+def format_time(time):
+    return datetime.datetime.strftime(time, "%H:%M:%S")
 
 
 def parse_time(tstr):

@@ -36,3 +36,14 @@ def get_dose(dose_id):
         dose["dispenseBefore"],
         dose["dispenseAfter"],
         medications)
+
+
+def create_dose_history_entry(dose_id, dose_history):
+    """Creates a new dose history entry in the service"""
+    config = AppConfig()
+
+    client.post_json("/users/%d/dosehistory" % config.dispenser.patient_id, {
+        "doseId": dose_id,
+        "dispensedDay": dose_history.dispensed_day,
+        "dispensedTime": dose_history.dispensed_time
+    })
