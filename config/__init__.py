@@ -20,6 +20,15 @@ class AppConfig(object):
             self.dispenser_id = dispenser_id
             self.patient_id = patient_id
 
+    class ApiConfig(object):
+        def __init__(self, host):
+            self.host = host
+
+    class DisplayConfig(object):
+        def __init__(self, width, height):
+            self.width = width
+            self.height = height
+
     def __init__(self):
         config = ConfigParser.RawConfigParser()
         config.read('./config.cfg')
@@ -36,3 +45,9 @@ class AppConfig(object):
         self.dispenser = self.DispenserConfig(
             config.getint('dispenser', 'dispenser_id'),
             config.getint('dispenser', 'patient_id'))
+
+        self.api = self.ApiConfig(config.get('api', 'host'))
+
+        self.display = self.DisplayConfig(
+            config.getint('display', 'width'),
+            config.getint('display', 'height'))

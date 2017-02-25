@@ -3,8 +3,6 @@ import json
 
 from config import AppConfig
 
-api_url = 'http://localhost:5000/api'
-
 
 class RestClient(object):
     """class for interfacing with the MySMDS API"""
@@ -13,13 +11,17 @@ class RestClient(object):
 
     def get_json(self, endpoint_url):
         """Executes a GET request to a JSON API endpoint"""
-        req = urllib2.Request(api_url + endpoint_url)
+        app_cfg = AppConfig()
+
+        req = urllib2.Request(app_cfg.api.host + endpoint_url)
         req.add_header('X-JWT', self.token)
         return json.load(urllib2.urlopen(req))
 
     def post_json(self, endpoint_url, data):
         """Executes a POST requrest to a JSON API endpoint"""
-        req = urllib2.Request(api_url + endpoint_url)
+        app_cfg = AppConfig()
+
+        req = urllib2.Request(app_cfg.api.host + endpoint_url)
         req.add_header('X-JWT', self.token)
         return json.load(urllib2.urlopen(req, json.dumps(data)))
 
@@ -31,7 +33,7 @@ data = {
     'authToken': cfg.auth.auth_token
 }
 
-auth_req = urllib2.Request('%s/authenticatedispenser' % api_url)
+auth_req = urllib2.Request('%s/authenticatedispenser' % cfg.api.host)
 response = json.load(urllib2.urlopen(auth_req, json.dumps(data)))
 
 client = RestClient(response['token'])

@@ -6,14 +6,22 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 
 from screens.home import HomeScreen
 
+from config import AppConfig
+
 kivy.require('1.9.1')
 
-Builder.load_file("./main.kv")
-Config.set('graphics', 'width', 480)
-Config.set('graphics', 'height', 320)
+# Set display settings from config
+cfg = AppConfig()
 
+Config.set('graphics', 'width', cfg.display.width)
+Config.set('graphics', 'height', cfg.display.height)
+
+# Initialize screen manager
 sm = ScreenManager()
 sm.add_widget(HomeScreen())
+
+# Load UI file
+Builder.load_file("./main.kv")
 
 
 class Application(App):
