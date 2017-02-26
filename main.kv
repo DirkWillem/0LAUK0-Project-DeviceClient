@@ -1,5 +1,22 @@
 #:kivy 1.0
 
+<ConnectingScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        ActionBar:
+            ActionView:
+                use_separator: True
+                ActionPrevious:
+                    title: 'SMDS'
+                    with_previous: False
+        Label:
+            id: connecting_label
+            markup: True
+            halign: 'center'
+            text_size: self.size
+            valign: 'middle'
+            text: 'Connecting to MySMDS...'
+
 <HomeScreen>:
     BoxLayout:
         orientation: 'vertical'
@@ -20,5 +37,3 @@
             size: (20, 20)
             text: "Dispense"
             on_press: root.dispense_clicked()
-
-<Settings>:

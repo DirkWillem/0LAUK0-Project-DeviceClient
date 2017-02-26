@@ -1,12 +1,13 @@
-from api import client
 from config import AppConfig
 
+import api
 import models.dose
 import models.medication
 
 
 def get_doses():
     config = AppConfig()
+    client = api.RestClient()
     doses = client.get_json("/users/%d/doses" % config.dispenser.patient_id)
 
     return [models.dose.DoseSummary(
@@ -19,6 +20,7 @@ def get_doses():
 
 def get_dose(dose_id):
     config = AppConfig()
+    client = api.RestClient()
     dose = client.get_json("/users/%d/doses/%d" % (config.dispenser.patient_id, dose_id))
 
     medications = []
@@ -41,6 +43,7 @@ def get_dose(dose_id):
 def create_dose_history_entry(dose_id, dose_history):
     """Creates a new dose history entry in the service"""
     config = AppConfig()
+    client = api.RestClient()
 
     client.post_json("/users/%d/dosehistory" % config.dispenser.patient_id, {
         "doseId": dose_id,

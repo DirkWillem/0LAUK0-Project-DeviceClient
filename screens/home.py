@@ -1,22 +1,23 @@
-import datetime
 import time
 import thread
 
 from kivy.uix.screenmanager import Screen
 import localapi.doses
 
+
 class HomeScreen(Screen):
     """Main screen of the application"""
 
     dispense_enabled = True
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         """Initialize the screen"""
-        super(Screen, self).__init__()
-        self.name = "Home"
+        super(Screen, self).__init__(**kwargs)
         self.stop = False
-        self.start_dose_workers()
         self.pending_dose = None
+
+    def on_enter(self):
+        self.start_dose_workers()
 
     def start_dose_workers(self):
         """Starts the background process that checks for new doses"""

@@ -5,6 +5,7 @@ from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 from screens.home import HomeScreen
+from screens.connecting import ConnectingScreen
 
 from config import AppConfig
 
@@ -21,7 +22,8 @@ Builder.load_file("./main.kv")
 
 # Initialize screen manager
 sm = ScreenManager()
-sm.add_widget(HomeScreen())
+sm.add_widget(ConnectingScreen(sm, name='Connecting'))
+sm.add_widget(HomeScreen(name='Home'))
 
 
 class Application(App):
