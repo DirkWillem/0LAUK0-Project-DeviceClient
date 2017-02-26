@@ -13,7 +13,7 @@ class RestClient(object):
         """Executes a GET request to a JSON API endpoint"""
         app_cfg = AppConfig()
 
-        req = urllib2.Request(app_cfg.api.host + endpoint_url)
+        req = urllib2.Request('%s/api%s' % (app_cfg.api.host, endpoint_url))
         req.add_header('X-JWT', self.token)
         return json.load(urllib2.urlopen(req))
 
@@ -21,7 +21,7 @@ class RestClient(object):
         """Executes a POST requrest to a JSON API endpoint"""
         app_cfg = AppConfig()
 
-        req = urllib2.Request(app_cfg.api.host + endpoint_url)
+        req = urllib2.Request('%s/api%s' % (app_cfg.api.host, endpoint_url))
         req.add_header('X-JWT', self.token)
         return json.load(urllib2.urlopen(req, json.dumps(data)))
 
@@ -33,7 +33,7 @@ data = {
     'authToken': cfg.auth.auth_token
 }
 
-auth_req = urllib2.Request('%s/authenticatedispenser' % cfg.api.host)
+auth_req = urllib2.Request('%s/api/authenticatedispenser' % cfg.api.host)
 response = json.load(urllib2.urlopen(auth_req, json.dumps(data)))
 
 client = RestClient(response['token'])

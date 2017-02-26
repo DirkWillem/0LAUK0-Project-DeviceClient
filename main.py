@@ -16,12 +16,12 @@ cfg = AppConfig()
 Config.set('graphics', 'width', cfg.display.width)
 Config.set('graphics', 'height', cfg.display.height)
 
+# Load UI file
+Builder.load_file("./main.kv")
+
 # Initialize screen manager
 sm = ScreenManager()
 sm.add_widget(HomeScreen())
-
-# Load UI file
-Builder.load_file("./main.kv")
 
 
 class Application(App):
