@@ -1,0 +1,20 @@
+[
+  {
+    "type": "title",
+    "title": "Remote properties"
+  },
+  {
+    "type": "numeric",
+    "title": "Dispenser ID",
+    "desc": "The ID of the dispenser",
+    "section": "dispenser",
+    "key": "dispenser_id"
+  },
+  {
+    "type": "numeric",
+    "title": "Patient ID",
+    "desc": "The ID of the user",
+    "section": "dispenser",
+    "key": "patient_id"
+  }
+]

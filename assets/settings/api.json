@@ -1,0 +1,24 @@
+[
+  {
+    "type": "title",
+    "title": "API Host Settings"
+  },
+  {
+    "type": "string",
+    "title": "API URL",
+    "desc": "The URL to reach the API",
+    "section": "api",
+    "key": "host"
+  },
+  {
+    "type": "title",
+    "title": "API Authorization Settings"
+  },
+  {
+    "type": "string",
+    "title": "Auth token",
+    "desc": "The auth token to use with the API",
+    "section": "auth",
+    "key": "token"
+  }
+]

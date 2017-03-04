@@ -10,14 +10,21 @@ class HomeScreen(Screen):
 
     dispense_enabled = True
 
-    def __init__(self, **kwargs):
+    def __init__(self, sm, **kwargs):
         """Initialize the screen"""
         super(Screen, self).__init__(**kwargs)
+        self.sm = sm
         self.stop = False
         self.pending_dose = None
 
     def on_enter(self):
         self.start_dose_workers()
+
+    def open_settings(self):
+        self.stop = True
+        self.sm.transition.direction = 'up'
+        self.sm.prev = 'Home'
+        self.sm.current = 'Settings'
 
     def start_dose_workers(self):
         """Starts the background process that checks for new doses"""

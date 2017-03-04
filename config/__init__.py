@@ -1,4 +1,10 @@
-import ConfigParser
+from kivy.config import ConfigParser
+from os.path import isfile
+import shutil
+
+
+if not isfile('./config.local.cfg'):
+    shutil.copy2('./config.cfg', './config.local.cfg')
 
 
 class AppConfig(object):
@@ -30,8 +36,10 @@ class AppConfig(object):
             self.height = height
 
     def __init__(self):
-        config = ConfigParser.RawConfigParser()
-        config.read('./config.cfg')
+        config = ConfigParser()
+        config.read('./config.local.cfg')
+
+        self.config_parser = config
 
         self.db = self.DbConfig(
             config.get('database', 'host'),

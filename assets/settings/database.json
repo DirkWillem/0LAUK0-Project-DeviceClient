@@ -1,0 +1,38 @@
+[
+  {
+    "type": "title",
+    "title": "Database settings"
+  },
+  {
+    "type": "string",
+    "title": "MySQL host",
+    "desc": "The URL to reach MySQL",
+    "section": "database",
+    "key": "host"
+  },
+  {
+    "type": "string",
+    "title": "Database name",
+    "desc": "The name of the database to use",
+    "section": "database",
+    "key": "database"
+  },
+  {
+    "type": "title",
+    "title": "Database credentials"
+  },
+  {
+    "type": "string",
+    "title": "Username",
+    "desc": "The username of the user to use",
+    "section": "database",
+    "key": "user"
+  },
+  {
+    "type": "string",
+    "title": "Password",
+    "desc": "The password of the user to use",
+    "section": "database",
+    "key": "password"
+  }
+]

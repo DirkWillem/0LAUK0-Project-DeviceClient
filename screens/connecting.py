@@ -13,14 +13,27 @@ class ConnectingScreen(Screen):
         super(Screen, self).__init__(**kwargs)
         self.name = 'Connecting'
         self.sm = sm
+        self.stop = False
 
     def on_enter(self):
+        self.stop = False
         self.connect()
+
+    def open_settings(self):
+        self.stop = True
+        self.sm.transition.direction = 'up'
+        self.sm.prev = 'Connecting'
+        self.sm.current = 'Settings'
 
     def connect(self):
         def connect_worker():
+            print 'Starting worker'
             while True:
+                if self.stop:
+                    print 'Stopping worker'
+                    return
                 if api.try_connect():
+                    self.sm.transition.direction = 'left'
                     self.sm.current = 'Home'
                     return
                 time.sleep(1)
