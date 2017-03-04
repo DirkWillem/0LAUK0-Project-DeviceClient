@@ -28,6 +28,7 @@ sm.add_widget(HomeScreen(name='Home'))
 
 class Application(App):
     def build(self):
+        self.icon = 'assets/smds-logo.png'
         return sm
 
 if __name__ == '__main__':
