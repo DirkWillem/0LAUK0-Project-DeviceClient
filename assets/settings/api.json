@@ -5,8 +5,8 @@
   },
   {
     "type": "string",
-    "title": "API URL",
-    "desc": "The URL to reach the API",
+    "title": "API Host",
+    "desc": "The host the service is running on",
     "section": "api",
     "key": "host"
   },
