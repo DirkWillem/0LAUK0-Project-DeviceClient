@@ -1,5 +1,6 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.settings import Settings
+from kivy.core.window import Window
 import config
 
 

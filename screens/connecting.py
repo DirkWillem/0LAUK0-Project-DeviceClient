@@ -27,10 +27,8 @@ class ConnectingScreen(Screen):
 
     def connect(self):
         def connect_worker():
-            print 'Starting worker'
             while True:
                 if self.stop:
-                    print 'Stopping worker'
                     return
                 if api.try_connect():
                     self.sm.transition.direction = 'left'
