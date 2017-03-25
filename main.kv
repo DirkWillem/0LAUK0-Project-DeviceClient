@@ -1,4 +1,5 @@
-#:kivy 1.0
+#:kivy 1.9.1
+#: import ListAdapter kivy.adapters.listadapter.ListAdapter
 
 <ConnectingScreen>:
     BoxLayout:
@@ -38,6 +39,10 @@
                     app_icon_width: 48
                 ActionOverflow:
                 ActionButton:
+                    text: 'History'
+                    on_press: root.open_history()
+                ActionSeparator:
+                ActionButton:
                     text: 'Settings'
                     on_press: root.open_settings()
         Label:
@@ -51,3 +56,38 @@
             size: (20, 20)
             text: "Dispense"
             on_press: root.dispense_clicked()
+
+[HistoryEntry@BoxLayout]:
+    orientation: 'vertical'
+    padding: 16
+    Label:
+        text: ctx.entry.title
+        halign: 'left'
+        valign: 'middle'
+        text_size: self.size
+        bold: True
+    Label:
+        text: ctx.entry.status_text()
+        color: ctx.entry.get_color()
+        halign: 'left'
+        valign: 'middle'
+        text_size: self.size
+
+<HistoryScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        ActionBar:
+            ActionView:
+                use_separator: True
+                ActionPrevious:
+                    title: 'SMDS - History'
+                    with_previous: True
+                    app_icon: 'assets/smds-logo.png'
+                    app_icon_height: 48
+                    app_icon_width: 48
+                    on_press: root.open_home()
+
+        ListView:
+            id: list_view
+            adapter:
+                ListAdapter(data=root.history, template='HistoryEntry', args_converter=root.data_converter)

@@ -6,6 +6,7 @@ class DoseHistorySummary(object):
         self.dispensed_day = dispensed_day
         self.dispensed_time = dispensed_time
 
+
 class DoseMinimal(object):
     """Contains minimal data on a dose"""
 
