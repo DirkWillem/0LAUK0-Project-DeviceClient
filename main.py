@@ -20,7 +20,7 @@ from screens.home import HomeScreen
 from screens.connecting import ConnectingScreen
 from screens.settings import SettingsScreen
 from screens.history import HistoryScreen
-
+from screens.prnmedications import PRNMedications
 
 
 # Load UI file
@@ -32,6 +32,7 @@ sm.add_widget(ConnectingScreen(sm, name='Connecting'))
 sm.add_widget(HomeScreen(sm, name='Home'))
 sm.add_widget(SettingsScreen(sm, name='Settings'))
 sm.add_widget(HistoryScreen(sm, name='History'))
+sm.add_widget(PRNMedications(sm, name='PRNMedications'))
 
 
 class Application(App):

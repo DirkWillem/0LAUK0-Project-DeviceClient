@@ -3,7 +3,6 @@ from kivy.logger import Logger
 from localapi import get_mysql_cnx
 
 import datetime
-import time
 import api.doses
 import localapi.medications
 import models.dose

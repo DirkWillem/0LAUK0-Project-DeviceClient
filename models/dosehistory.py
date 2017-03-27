@@ -22,7 +22,7 @@ class DoseStatus(object):
 
     def status_text(self):
         if self.dispensed:
-            return 'Dispensed'
+            return 'Dispensed at %s' % self.dispensed_time
         elif self.being_dispensed:
             return 'Being dispensed'
         elif self.pending:

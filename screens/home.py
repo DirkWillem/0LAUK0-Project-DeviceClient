@@ -32,6 +32,12 @@ class HomeScreen(Screen):
         self.sm.prev = 'Home'
         self.sm.current = 'History'
 
+    def open_prn_medications(self):
+        self.stop = True
+        self.sm.transition.direction = 'down'
+        self.sm.prev = 'Home'
+        self.sm.current = 'PRNMedications'
+
     def start_dose_workers(self):
         """Starts the background process that checks for new doses"""
 

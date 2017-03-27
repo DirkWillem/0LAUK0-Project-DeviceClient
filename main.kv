@@ -1,5 +1,5 @@
 #:kivy 1.9.1
-#: import ListAdapter kivy.adapters.listadapter.ListAdapter
+#: import SimpleListAdapter kivy.adapters.simplelistadapter.SimpleListAdapter
 
 <ConnectingScreen>:
     BoxLayout:
@@ -39,6 +39,9 @@
                     app_icon_width: 48
                 ActionOverflow:
                 ActionButton:
+                    text: 'PRN'
+                    on_press: root.open_prn_medications()
+                ActionButton:
                     text: 'History'
                     on_press: root.open_history()
                 ActionSeparator:
@@ -55,6 +58,7 @@
             id: dispense_button
             size: (20, 20)
             text: "Dispense"
+            size_hint: (1, 0.3)
             on_press: root.dispense_clicked()
 
 [HistoryEntry@BoxLayout]:
@@ -90,4 +94,50 @@
         ListView:
             id: list_view
             adapter:
-                ListAdapter(data=root.history, template='HistoryEntry', args_converter=root.data_converter)
+                SimpleListAdapter(data=root.history, template='HistoryEntry', args_converter=root.data_converter)
+
+[PRNMedication@BoxLayout]:
+    orientation: 'horizontal'
+    padding: 16
+    height: 240
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: ctx.medication.medication.title
+            halign: 'left'
+            valign: 'middle'
+            text_size: self.size
+            bold: True
+            size_hint: (1, 0.2)
+        Label:
+            text: ctx.medication.get_description()
+            markup: True
+            halign: 'left'
+            valign: 'top'
+            text_size: self.size
+            size_hint: (1, 0.8)
+    Button:
+        id: dispense_button
+        size: (20, 20)
+        size_hint: (0.4, 1)
+        text: "Dispense"
+        on_press: ctx.dispense_callback()
+
+<PRNMedications>:
+    BoxLayout:
+        orientation: 'vertical'
+        ActionBar:
+            ActionView:
+                use_separator: True
+                ActionPrevious:
+                    title: 'SMDS - PRN medications'
+                    with_previous: True
+                    app_icon: 'assets/smds-logo.png'
+                    app_icon_height: 48
+                    app_icon_width: 48
+                    on_press: root.open_home()
+
+        ListView:
+            id: list_view
+            adapter:
+                SimpleListAdapter(data=root.medications, template='PRNMedication', args_converter=root.convert_data)
