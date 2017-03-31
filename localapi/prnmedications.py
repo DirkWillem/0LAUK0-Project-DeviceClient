@@ -226,7 +226,7 @@ VALUES (%(id)s, %(title)s, %(description)s)
     prn_local = get_prn_medications()
 
     for pl in prn_local:
-        if not any([pr for pr in prn_remote if pr.prn_medication_id != pl.prn_medication_id]):
+        if not any([pr for pr in prn_remote if pr.prn_medication_id == pl.prn_medication_id]):
             Logger.info("Deleting PRN medication record with ID %d" % pl.prn_medication_id)
 
             cursor.execute(delete_prn_medication_query, {
