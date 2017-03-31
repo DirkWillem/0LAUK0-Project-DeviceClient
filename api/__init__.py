@@ -33,6 +33,14 @@ class RestClient(object):
         req.add_header('X-JWT', self.token)
         return json.load(urllib2.urlopen(req, json.dumps(data)))
 
+    def post_json_no_response(self, endpoint_url, data):
+        """Executes a POST requrest to a JSON API endpoint without expecting a response"""
+        app_cfg = AppConfig()
+
+        req = urllib2.Request('%s/api%s' % (app_cfg.api.host, endpoint_url))
+        req.add_header('X-JWT', self.token)
+        urllib2.urlopen(req, json.dumps(data))
+
 
 def try_connect():
     """Tries to connect to the API"""

@@ -99,7 +99,7 @@
 [PRNMedication@BoxLayout]:
     orientation: 'horizontal'
     padding: 16
-    height: 240
+    height: 260
     BoxLayout:
         orientation: 'vertical'
         Label:
@@ -122,6 +122,7 @@
         size_hint: (0.4, 1)
         text: "Dispense"
         on_press: ctx.dispense_callback()
+        disabled: not ctx.medication.can_dispense
 
 <PRNMedications>:
     BoxLayout:

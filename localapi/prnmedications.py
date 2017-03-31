@@ -3,6 +3,7 @@ from kivy.logger import Logger
 from localapi import get_mysql_cnx
 
 import localapi.medications
+from localapi.doses import format_date, format_time
 import models.prnmedication
 import models.medication
 import api.prnmedications
@@ -12,9 +13,27 @@ def get_prn_medications():
     """Returns all PRN medications that are saved locally"""
 
     query = """
-SELECT P.ID, P.Description, P.MaxDaily, P.MinInterval, M.ID, M.Title, M.Description FROM PRNMedications P
-  LEFT JOIN Medications M ON P.MedicationID = M.ID
-    """
+SELECT
+  PM.ID, PM.Description, PM.MaxDaily, PM.MinInterval, M.ID, M.Title, M.Description,
+  IFNULL((PM.MaxDaily = 0 OR PM.MaxDaily > IFNULL(PHC.NDispensed, 0)) AND
+    (DATE_ADD(PHT.LastDispensed, INTERVAL PM.Mininterval HOUR)) < NOW(), 1) AS CanDispense,
+  CASE
+    WHEN IFNULL((PM.MaxDaily != 0 AND PM.MaxDaily <= IFNULL(PHC.NDispensed, 0)), 1) THEN
+      GREATEST(TIMESTAMP(DATE_ADD(CURRENT_DATE(), INTERVAL 1 DAY), TIME(0)),
+          IFNULL(DATE_ADD(PHT.LastDispensed, INTERVAL PM.Mininterval HOUR), NOW()))
+    WHEN IFNULL((PM.MaxDaily = 0 OR PM.MaxDaily < PHC.NDispensed) AND
+      (DATE_ADD(PHT.LastDispensed, INTERVAL PM.Mininterval HOUR)) < NOW(), 1) THEN NOW()
+    ELSE DATE_ADD(PHT.LastDispensed, INTERVAL PM.Mininterval HOUR)
+  END AS CanDispenseAt,
+  PHC.NDispensed AS NDispensed,
+  PHT.LastDispensed AS LastDispensed
+FROM PRNMedications PM
+  LEFT JOIN (SELECT PRNMedicationID, COUNT(*) AS NDispensed FROM PRNHistory
+    WHERE DATE(DispensedTime) = CURRENT_DATE()
+    GROUP BY PRNMedicationID) PHC ON PHC.PRNMedicationID = PM.ID
+  LEFT JOIN (SELECT PRNMedicationID, MAX(DispensedTime) AS LastDispensed FROM PRNHistory
+    GROUP BY PRNMedicationID) PHT ON PHT.PRNMedicationID = PM.ID
+  LEFT JOIN Medications M ON M.ID = PM.MedicationID"""
 
     # Connect to MySQL
     cnx = get_mysql_cnx()
@@ -25,11 +44,11 @@ SELECT P.ID, P.Description, P.MaxDaily, P.MinInterval, M.ID, M.Title, M.Descript
     cursor.execute(query)
     for (
             prn_medication_id, description, max_daily, min_interval, medication_id, title,
-            medication_description) in cursor:
+            medication_description, can_dispense, can_dispense_at, n_dispensed, last_dispensed) in cursor:
+        medication = models.medication.MedicationSummary(medication_id, title, medication_description)
         result.append(models.prnmedication.PRNMedicationLocal(prn_medication_id, description, max_daily, min_interval,
-                                                              models.medication.MedicationSummary(medication_id,
-                                                                                                  title,
-                                                                                                  medication_description)))
+                                                              medication, can_dispense, can_dispense_at, n_dispensed,
+                                                              last_dispensed))
 
     # Close connection and return
     cursor.close()
@@ -41,10 +60,28 @@ def get_prn_medication(prn_medication_id):
     """Returns a locally saved PRN medication by its ID"""
 
     query = """
-    SELECT P.ID, P.Description, P.MaxDaily, P.MinInterval, M.ID, M.Title, M.Description FROM PRNMedications P
-      LEFT JOIN Medications M ON P.MedicationID = M.ID
-      WHERE P.ID = %(id)s
-        """
+SELECT
+  PM.ID, PM.Description, PM.MaxDaily, PM.MinInterval, M.ID, M.Title, M.Description,
+  IFNULL((PM.MaxDaily = 0 OR PM.MaxDaily > IFNULL(PHC.NDispensed, 0)) AND
+    (DATE_ADD(PHT.LastDispensed, INTERVAL PM.Mininterval HOUR)) < NOW(), 1) AS CanDispense,
+  CASE
+    WHEN IFNULL((PM.MaxDaily != 0 AND PM.MaxDaily <= IFNULL(PHC.NDispensed, 0)), 1) THEN
+      GREATEST(TIMESTAMP(DATE_ADD(CURRENT_DATE(), INTERVAL 1 DAY), TIME(0)),
+          IFNULL(DATE_ADD(PHT.LastDispensed, INTERVAL PM.Mininterval HOUR), NOW()))
+    WHEN IFNULL((PM.MaxDaily = 0 OR PM.MaxDaily < PHC.NDispensed) AND
+      (DATE_ADD(PHT.LastDispensed, INTERVAL PM.Mininterval HOUR)) < NOW(), 1) THEN NOW()
+    ELSE DATE_ADD(PHT.LastDispensed, INTERVAL PM.Mininterval HOUR)
+  END AS CanDispenseAt,
+  PHC.NDispensed AS NDispensed,
+  PHT.LastDispensed AS LastDispensed
+FROM PRNMedications PM
+  LEFT JOIN (SELECT PRNMedicationID, COUNT(*) AS NDispensed FROM PRNHistory
+    WHERE DATE(DispensedTime) = CURRENT_DATE()
+    GROUP BY PRNMedicationID) PHC ON PHC.PRNMedicationID = PM.ID
+  LEFT JOIN (SELECT PRNMedicationID, MAX(DispensedTime) AS LastDispensed FROM PRNHistory
+    GROUP BY PRNMedicationID) PHT ON PHT.PRNMedicationID = PM.ID
+  LEFT JOIN Medications M ON M.ID = PM.MedicationID
+WHERE PM.ID = %(id)s"""
 
     # Connect to MySQL
     cnx = get_mysql_cnx()
@@ -62,11 +99,12 @@ def get_prn_medication(prn_medication_id):
 
     if result_tuple is not None:
         (prn_medication_id, description, max_daily, min_interval, medication_id, title,
-         medication_description) = result_tuple
+         medication_description, can_dispense, can_dispense_at, n_dispensed, last_dispensed) = result_tuple
 
+        medication = models.medication.MedicationSummary(medication_id, title, medication_description)
         return models.prnmedication.PRNMedicationLocal(prn_medication_id, description, max_daily, min_interval,
-                                                       models.medication.MedicationSummary(medication_id, title,
-                                                                                           medication_description))
+                                                       medication, can_dispense, can_dispense_at, n_dispensed,
+                                                       last_dispensed)
     return None
 
 
@@ -79,12 +117,26 @@ def notify_prn_dispensed(prn_medication):
 INSERT INTO PRNHistory (PRNMedicationID, DispensedTime) VALUES (%(prn_id)s, TIMESTAMP(CURRENT_DATE(), CURRENT_TIME()))
     """
 
+    select_query = """
+SELECT DispensedTime, DispensedTime FROM PRNHistory WHERE ID = %(prn_history_id)s
+    """
+
     # Connect to MySQL
     cnx = get_mysql_cnx()
     cursor = cnx.cursor()
 
     # Execute query
     cursor.execute(insert_query, {'prn_id': prn_medication.prn_medication_id})
+
+    insert_id = cursor.lastrowid
+
+    result = None
+    cursor.execute(select_query, {"prn_history_id": insert_id})
+
+    for (dispensed_day, dispensed_time) in cursor:
+        result = models.prnmedication.PRNHistorySummary(insert_id, format_date(dispensed_day), format_time(dispensed_time))
+
+    api.prnmedications.create_prn_history_entry(prn_medication.prn_medication_id, result)
 
     # Commit
     cnx.commit()
@@ -167,7 +219,7 @@ VALUES (%(id)s, %(title)s, %(description)s)
                     "description": pr.description,
                     "max_daily": pr.max_daily,
                     "min_interval": pr.min_interval,
-                    "medication_id": pr.medication.id
+                    "medication_id": pr.medication.medication_id
                 })
 
     # Check if any PRN medications need to be removed

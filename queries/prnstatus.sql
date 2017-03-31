@@ -1,4 +1,5 @@
 SELECT
+  PM.ID, PM.Description, PM.MaxDaily, PM.MinInterval, M.ID, M.Title, M.Description,
   IFNULL((PM.MaxDaily = 0 OR PM.MaxDaily < PH.NDispensed) AND
     (DATE_ADD(PH.LastDispensed, INTERVAL PM.Mininterval HOUR)) < NOW(), 1) AS CanDispense,
   CASE
@@ -11,3 +12,4 @@ FROM PRNMedications PM
   LEFT JOIN (SELECT PRNMedicationID, MAX(DispensedTime) AS LastDispensed, COUNT(*) AS NDispensed FROM PRNHistory
     WHERE DATE(DispensedTime) = CURRENT_DATE()
     GROUP BY PRNMedicationID) PH ON PH.PRNMedicationID = PM.ID
+  LEFT JOIN Medications M ON PM.MedicationID = M.ID

@@ -34,7 +34,7 @@ class HomeScreen(Screen):
 
     def open_prn_medications(self):
         self.stop = True
-        self.sm.transition.direction = 'down'
+        self.sm.transition.direction = 'left'
         self.sm.prev = 'Home'
         self.sm.current = 'PRNMedications'
 

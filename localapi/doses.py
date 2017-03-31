@@ -128,14 +128,14 @@ SELECT CURRENT_DATE(), DispensedTime FROM DoseHistory WHERE ID = %(dose_history_
     for (dispensed_day, dispensed_time) in cursor:
         result = models.dose.DoseHistorySummary(insert_id, format_date(dispensed_day), format_time(dispensed_time))
 
+    # Notify service that this record has been inserted
+    api.doses.create_dose_history_entry(dose.dose_id, result)
+
     cnx.commit()
 
     # Close connection
     cursor.close()
     cnx.close()
-
-    # Notify service that this record has been inserted
-    api.doses.create_dose_history_entry(dose.dose_id, result)
 
 
 def format_date(date):
