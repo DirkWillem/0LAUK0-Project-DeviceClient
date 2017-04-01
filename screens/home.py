@@ -82,6 +82,7 @@ class HomeScreen(Screen):
         self.check_pending_dose()
 
         if self.pending_dose is not None:
+            self.ids.dispense_button.disabled = True
             localapi.doses.notify_dose_dispensed(self.pending_dose)
             self.pending_dose = None
             self.check_pending_dose()

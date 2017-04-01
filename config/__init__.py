@@ -35,6 +35,10 @@ class AppConfig(object):
             self.width = width
             self.height = height
 
+    class HardwareConfig(object):
+        def __init__(self, serial_port):
+            self.serial_port = serial_port
+
     def __init__(self):
         config = ConfigParser()
         config.read('./config.local.cfg')
@@ -59,3 +63,5 @@ class AppConfig(object):
         self.display = self.DisplayConfig(
             config.getint('display', 'width'),
             config.getint('display', 'height'))
+
+        self.hardware = self.HardwareConfig(config.get('hardware', 'serial_port'))

@@ -18,6 +18,7 @@ class SettingsScreen(Screen):
         s.add_json_panel('API', cfg, 'assets/settings/api.json')
         s.add_json_panel('Database', cfg, 'assets/settings/database.json')
         s.add_json_panel('Dispenser', cfg, 'assets/settings/dispenser.json')
+        s.add_json_panel('Hardware', cfg, 'assets/settings/hardware.json')
         s.on_close = lambda: self.close()
 
         self.add_widget(s, 0)

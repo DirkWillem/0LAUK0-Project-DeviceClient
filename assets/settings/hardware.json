@@ -1,0 +1,13 @@
+[
+  {
+    "type": "title",
+    "title": "Hardware Settings"
+  },
+  {
+    "type": "string",
+    "title": "Serial port",
+    "desc": "The serial port the Arduino is connected to",
+    "section": "hardware",
+    "key": "serial_port"
+  }
+]

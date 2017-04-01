@@ -7,6 +7,7 @@ from localapi.doses import format_date, format_time
 import models.prnmedication
 import models.medication
 import api.prnmedications
+import hardware.dispense
 
 
 def get_prn_medications():
@@ -142,6 +143,10 @@ SELECT DispensedTime, DispensedTime FROM PRNHistory WHERE ID = %(prn_history_id)
     cnx.commit()
     cursor.close()
     cnx.close()
+
+    # Dispense
+    Logger.info("Dispensing 1 of PRN medication %s" % prn_medication.medication.title)
+    hardware.dispense.dispense(1)
 
 
 def update_prn_medications_from_remote():

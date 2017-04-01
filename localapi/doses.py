@@ -7,6 +7,7 @@ import api.doses
 import localapi.medications
 import models.dose
 import models.medication
+import hardware.dispense
 
 
 def get_doses():
@@ -136,6 +137,13 @@ SELECT CURRENT_DATE(), DispensedTime FROM DoseHistory WHERE ID = %(dose_history_
     # Close connection
     cursor.close()
     cnx.close()
+
+    # Dispense medication
+    dose_details = get_dose(dose.dose_id)
+
+    for medication in dose_details.medications:
+        Logger.info("Dispensing %d of medication %s" % (medication.amount, medication.medication.title))
+        hardware.dispense.dispense(medication.amount)
 
 
 def format_date(date):
