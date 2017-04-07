@@ -1,7 +1,7 @@
 # 0LAUK0-Project-DeviceClient
 Raspberry Pi Client for the Pill Dispenser Service
 
-This repository contains the software that runs on the Raspberry Pi in the pill dispenser and is written in Python, and uses the Kivy framework.
+This repository contains the software that runs on the Raspberry Pi in the pill dispenser and is written in Python, and uses the Kivy framework. The DDL for the local database [can be found on the wiki](https://github.com/DirkWillem/0LAUK0-Project-DeviceClient/wiki/DDL)
 
 The code for the software in the cloud and the web application [can be found in a separate repository](https://github.com/DirkWillem/0LAUK0-project)
 
